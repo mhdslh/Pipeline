@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notice
-        runs: |
+        run: |
           echo "::notice ::This is notice1"
           echo "::notice ::This is notice2"
           echo "::notice ::This is notice3"

@@ -9,4 +9,4 @@ jobs:
     steps:
       - name: Notice
         run: |
-          echo "::notice ::This is notice1\nThis is notice2\nThis is notice3"
+          echo "::notice ::This is notice1%0AThis is notice2%0AThis is notice3"

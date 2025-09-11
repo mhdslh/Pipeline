@@ -119,6 +119,7 @@ jobs:
     steps:
       - name: Download flag
         id: download
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: retry-${{ matrix.name }}
@@ -129,7 +130,7 @@ jobs:
       #     echo "retry=$(cat retry.txt)" >> "$GITHUB_OUTPUT"
 
       - name: ${{ matrix.description }}
-        if: ${{ failure() }}
+        if: ${{ steps.download.outcome == 'failure' }}
         # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
         # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
         # with:

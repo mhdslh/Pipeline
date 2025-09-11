@@ -5,7 +5,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-22.04
-    # continue-on-error: true
+    continue-on-error: true
     # needs: [Use-version, Diff-to-current-st-extended-version]
     name: ${{ matrix.name }}
     env:

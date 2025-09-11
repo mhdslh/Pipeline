@@ -12,5 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: print
-        runs: |
+        run: |
           echo "HI ${{ matrix.node-version }}"
+          if [[ "${{ matrix.node-version }}" == "18" ]]; then
+            echo "OOPS"
+          fi
+
+  result:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: bye
+        run: |
+          echo "BYE"

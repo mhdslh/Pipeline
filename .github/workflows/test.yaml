@@ -62,7 +62,6 @@ jobs:
           if [[ "${{ matrix.test-case }}" == "cap-create-rate.robot" || "${{ matrix.test-case }}" == "rob-tc-6.robot" ]]; then
             exit 1
           fi
-          echo 
           sleep 20
 
       - name: set retry false
@@ -75,64 +74,69 @@ jobs:
       #     echo "Skipping test"
 
 
-  # retry:
-  #   runs-on: ubuntu-22.04
-  #   # needs: [Use-version, Diff-to-current-st-extended-version]
-  #   needs: [test]
-  #   name: ${{ matrix.name }}
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       include:
-  #         - name: "Worker-Node-Restart-Test"
-  #           description: "Rob Test -Robustness worker node ungraceful reboot"
-  #           project-id: "eod-ml3-cnf-test-04"
-  #           test-case: "rob-tc-1.robot"
-  #         - name: "eNodeB-gNodeB-Restart-Test"
-  #           description: "Rob Test - eNodeB/gNodeB restart"
-  #           project-id: "eod-ml3-cnf-test-05"
-  #           test-case: "rob-tc-8.robot"
-  #         - name: "Simulate-VM-Migration-Test"
-  #           description: "Maintainability Test (Migrate VM)"
-  #           project-id: "eod-ml3-cnf-test-06"
-  #           test-case: "maint-tc-3.robot"
-  #         - name: "OverLoad-Protection-Test"
-  #           description: "Rob Test (OverLoad Protection)"
-  #           project-id: "eod-ml3-cnf-test-07"
-  #           test-case: "rob-tc-6.robot"
-  #         - name: "Max-Payload-Test"
-  #           description: "Payload Test (Fixed Rate)"
-  #           project-id: "eod-ml3-cnf-test-08"
-  #           test-case: "basic-payload-test.robot"
-  #         - name: "Max-Signaling-Test"
-  #           description: "Max Create Test (Fixed rate)"
-  #           project-id: "eod-ml3-cnf-test-09"
-  #           test-case: "cap-create-rate.robot"
-  #   if: needs.test.outputs.${{ matrix.name }}-retry == 'true'   
-  #   steps:
-  #     - name: ${{ matrix.description }}
-  #       # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
-  #       # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
-  #       # with:
-  #       #   wif_provider: ${{ env.WIF_PROVIDER }}
-  #       #   wif_service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
-  #       #   cnaas_version: ${{ needs.Use-version.outputs.version }}
-  #       #   target_project_id: ${{ matrix.project-id }}
-  #       #   fw_node_setup: INSTANCE_MANAGER
-  #       #   fw_node_teardown: INSTANCE_MANAGER
-  #       #   expiration_days: 1
-  #       #   test: ${{ matrix.test-case }}
-  #       #   purge: 'true'
-  #       run: |
-  #         echo "${{ matrix.project-id }}"
-  #         echo "${{ matrix.test-case }}"
-  #         if [[ "${{ matrix.test-case }}" == "cap-create-rate.robot" ]]; then
-  #           exit 1
-  #         fi
-  #         echo 
-  #         sleep 20
+jobs:
+  retry:
+    runs-on: ubuntu-22.04
+    needs: [test]
+    # needs: [Use-version, Diff-to-current-st-extended-version]
+    name: ${{ matrix.name }}-Retry
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "Worker-Node-Restart-Test"
+            description: "Rob Test -Robustness worker node ungraceful reboot"
+            project-id: "eod-ml3-cnf-test-04"
+            test-case: "rob-tc-1.robot"
+          - name: "eNodeB-gNodeB-Restart-Test"
+            description: "Rob Test - eNodeB/gNodeB restart"
+            project-id: "eod-ml3-cnf-test-05"
+            test-case: "rob-tc-8.robot"
+          - name: "Simulate-VM-Migration-Test"
+            description: "Maintainability Test (Migrate VM)"
+            project-id: "eod-ml3-cnf-test-06"
+            test-case: "maint-tc-3.robot"
+          - name: "OverLoad-Protection-Test"
+            description: "Rob Test (OverLoad Protection)"
+            project-id: "eod-ml3-cnf-test-07"
+            test-case: "rob-tc-6.robot"
+          - name: "Max-Payload-Test"
+            description: "Payload Test (Fixed Rate)"
+            project-id: "eod-ml3-cnf-test-08"
+            test-case: "basic-payload-test.robot"
+          - name: "Max-Signaling-Test"
+            description: "Max Create Test (Fixed rate)"
+            project-id: "eod-ml3-cnf-test-09"
+            test-case: "cap-create-rate.robot"
+    if: needs.test.outputs[ ${{ matrix.name }}-retry ] == 'true'
+    steps:
+      - name: set retry true
+        run: |
+          echo "${{ matrix.name }}-retry=true" >> "$GITHUB_OUTPUT"
+
+      - name: ${{ matrix.description }}
+        # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
+        # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
+        # with:
+        #   wif_provider: ${{ env.WIF_PROVIDER }}
+        #   wif_service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+        #   cnaas_version: ${{ needs.Use-version.outputs.version }}
+        #   target_project_id: ${{ matrix.project-id }}
+        #   fw_node_setup: INSTANCE_MANAGER
+        #   fw_node_teardown: INSTANCE_MANAGER
+        #   expiration_days: 1
+        #   test: ${{ matrix.test-case }}
+        #   purge: 'true'
+        run: |
+          # echo "${{ matrix.project-id }}"
+          # echo "${{ matrix.test-case }}"
+          # if [[ "${{ matrix.test-case }}" == "cap-create-rate.robot" || "${{ matrix.test-case }}" == "rob-tc-6.robot" ]]; then
+          #   exit 1
+          # fi
+          echo "Retrying"
+          sleep 20
 
       # - name: Placeholder for skipping test
       #   if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'false'

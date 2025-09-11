@@ -16,6 +16,7 @@ jobs:
           echo "HI ${{ matrix.node-version }}"
           if [[ "${{ matrix.node-version }}" == "18" ]]; then
             echo "OOPS"
+            exit 1
           fi
 
   result:

@@ -110,7 +110,7 @@ jobs:
             test-case: "cap-create-rate.robot"
     steps:
       - name: ${{ matrix.description }}
-        if: needs.test.outputs[ ${{ matrix.name }}-retry ] == 'true'
+        if: ${{ needs.test.outputs[format('{0}-retry', matrix.name)] == 'true' }}
         # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
         # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
         # with:
@@ -142,7 +142,7 @@ jobs:
 
   result:
     runs-on: ubuntu-latest
-    needs: test
+    needs: retry
     steps:
       - name: BYE
         run: |

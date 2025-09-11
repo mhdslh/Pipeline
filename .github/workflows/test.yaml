@@ -39,11 +39,8 @@ jobs:
             project-id: "eod-ml3-cnf-test-09"
             test-case: "cap-create-rate.robot"
     steps:
-      - name: set retry true
-        run: |
-          echo "${{ matrix.name }}-retry=true" >> "$GITHUB_OUTPUT"
-
       - name: ${{ matrix.description }}
+        id: run
         # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
         # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
         # with:
@@ -64,14 +61,25 @@ jobs:
           fi
           sleep 20
 
-      - name: set retry false
-        run: |
-          echo "${{ matrix.name }}-retry=false" >> "$GITHUB_OUTPUT"
-
       # - name: Placeholder for skipping test
       #   if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'false'
       #   run: |
       #     echo "Skipping test"
+
+      - name: Mark retry true
+        if: ${{ steps.run.outcome == 'failure' }}
+        run: echo "true" > retry.txt
+
+      - name: Mark retry false
+        if: ${{ steps.run.outcome != 'failure' }}
+        run: echo "false" > retry.txt
+
+      - name: Upload retry flag (per shard)
+        uses: actions/upload-artifact@v4
+        with:
+          name: retry-${{ matrix.name }}
+          path: retry.txt
+
 
   retry:
     runs-on: ubuntu-22.04
@@ -109,8 +117,18 @@ jobs:
             project-id: "eod-ml3-cnf-test-09"
             test-case: "cap-create-rate.robot"
     steps:
+      - name: Download flag
+        uses: actions/download-artifact@v4
+        with:
+          name: retry-${{ matrix.name }}
+          path: .
+
+      - id: flag
+        run: |
+          echo "retry=$(cat retry.txt)" >> "$GITHUB_OUTPUT"
+
       - name: ${{ matrix.description }}
-        # if: ${{ needs.test.outputs[format('{0}-retry', matrix.name)] == 'true' }}
+        if: ${{ steps.flag.outputs.retry == 'true' }}
         # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
         # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
         # with:
@@ -124,7 +142,6 @@ jobs:
         #   test: ${{ matrix.test-case }}
         #   purge: 'true'
         run: |
-          echo "============ ${{ needs.test.outputs[format('{0}-retry', matrix.name)] }} ============"
           # echo "${{ matrix.project-id }}"
           # echo "${{ matrix.test-case }}"
           # if [[ "${{ matrix.test-case }}" == "cap-create-rate.robot" || "${{ matrix.test-case }}" == "rob-tc-6.robot" ]]; then

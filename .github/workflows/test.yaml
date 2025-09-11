@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           - name: "Worker-Node-Restart-Test"
-            description: "Rob Test -Robustness worker node ungraceful reboot"
+            description: "Rob Test - Robustness worker node ungraceful reboot"
             project-id: "eod-ml3-cnf-test-04"
             test-case: "rob-tc-1.robot"
           - name: "eNodeB-gNodeB-Restart-Test"
@@ -66,20 +66,14 @@ jobs:
       #   run: |
       #     echo "Skipping test"
 
-      - name: Mark retry true
-        if: ${{ steps.run.outcome == 'failure' }}
-        run: echo "true" > retry.txt
+      - name: Set retry decision
+        run: echo "skip retry" > retry.txt
 
-      - name: Mark retry false
-        if: ${{ steps.run.outcome != 'failure' }}
-        run: echo "false" > retry.txt
-
-      - name: Upload retry flag (per shard)
-        uses: actions/upload-artifact@v4
+      - name: Upload retry decision
+        uses: actions/upload-artifact@6027e3dd177782cd8ab9af838c04fd81a07f1d47 # v4
         with:
           name: retry-${{ matrix.name }}
           path: retry.txt
-
 
   retry:
     runs-on: ubuntu-22.04
@@ -117,17 +111,13 @@ jobs:
             project-id: "eod-ml3-cnf-test-09"
             test-case: "cap-create-rate.robot"
     steps:
-      - name: Download flag
+      - name: Retry flag
         id: download
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v4
         with:
           name: retry-${{ matrix.name }}
           path: .
-
-      # - id: flag
-      #   run: |
-      #     echo "retry=$(cat retry.txt)" >> "$GITHUB_OUTPUT"
 
       - name: ${{ matrix.description }}
         if: ${{ steps.download.outcome == 'failure' }}

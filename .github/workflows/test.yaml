@@ -73,8 +73,6 @@ jobs:
       #   run: |
       #     echo "Skipping test"
 
-
-jobs:
   retry:
     runs-on: ubuntu-22.04
     needs: [test]

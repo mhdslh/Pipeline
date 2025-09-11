@@ -124,6 +124,7 @@ jobs:
         #   test: ${{ matrix.test-case }}
         #   purge: 'true'
         run: |
+          echo "============ ${{ needs.test.outputs[format('{0}-retry', matrix.name)] }} ============"
           # echo "${{ matrix.project-id }}"
           # echo "${{ matrix.test-case }}"
           # if [[ "${{ matrix.test-case }}" == "cap-create-rate.robot" || "${{ matrix.test-case }}" == "rob-tc-6.robot" ]]; then

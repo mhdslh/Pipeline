@@ -4,26 +4,72 @@ on:
 
 jobs:
   test:
-    name: testing-for-${{ matrix.node-version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    needs: [Use-version, Diff-to-current-st-extended-version]
+    name: ${{ matrix.name }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18, 20, 22] # This will create 3 parallel jobs
+        include:
+          - name: "Worker-Node-Restart-Test"
+            description: "Rob Test -Robustness worker node ungraceful reboot"
+            project-id: "eod-ml3-cnf-test-04"
+            test-case: "rob-tc-1.robot"
+          - name: "eNodeB-gNodeB-Restart-Test"
+            description: "Rob Test - eNodeB/gNodeB restart"
+            project-id: "eod-ml3-cnf-test-05"
+            test-case: "rob-tc-8.robot"
+          - name: "Simulate-VM-Migration-Test"
+            description: "Maintainability Test (Migrate VM)"
+            project-id: "eod-ml3-cnf-test-06"
+            test-case: "maint-tc-3.robot"
+          - name: "OverLoad-Protection-Test"
+            description: "Rob Test (OverLoad Protection)"
+            project-id: "eod-ml3-cnf-test-07"
+            test-case: "rob-tc-6.robot"
+          - name: "Max-Payload-Test"
+            description: "Payload Test (Fixed Rate)"
+            project-id: "eod-ml3-cnf-test-08"
+            test-case: "basic-payload-test.robot"
+          - name: "Max-Signaling-Test"
+            description: "Max Create Test (Fixed rate)"
+            project-id: "eod-ml3-cnf-test-09"
+            test-case: "cap-create-rate.robot"
     steps:
-      - uses: actions/checkout@v4
-      - name: print
+      - name: ${{ matrix.description }}
+        # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
+        # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
+        # with:
+        #   wif_provider: ${{ env.WIF_PROVIDER }}
+        #   wif_service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+        #   cnaas_version: ${{ needs.Use-version.outputs.version }}
+        #   target_project_id: ${{ matrix.project-id }}
+        #   fw_node_setup: INSTANCE_MANAGER
+        #   fw_node_teardown: INSTANCE_MANAGER
+        #   expiration_days: 1
+        #   test: ${{ matrix.test-case }}
+        #   purge: 'true'
         run: |
-          echo "HI ${{ matrix.node-version }}"
-          if [[ "${{ matrix.node-version }}" == "18" ]]; then
-            echo "OOPS"
-            exit 1
-          fi
+          echo "${{ matrix.project-id }}"
+          echo "${{ matrix.test-case }}"
+          sleep 20
+
+      - name: Placeholder for skipping test
+        if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'false'
+        run: |
+          echo "Skipping test"
+
+
+
+
+
 
   result:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: bye
+      - name: BYE
         run: |
           echo "BYE"

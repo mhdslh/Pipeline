@@ -4,6 +4,7 @@ on:
 
 jobs:
   test:
+    name: testing-for-${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -108,13 +108,9 @@ jobs:
             description: "Max Create Test (Fixed rate)"
             project-id: "eod-ml3-cnf-test-09"
             test-case: "cap-create-rate.robot"
-    if: needs.test.outputs[ ${{ matrix.name }}-retry ] == 'true'
     steps:
-      - name: set retry true
-        run: |
-          echo "${{ matrix.name }}-retry=true" >> "$GITHUB_OUTPUT"
-
       - name: ${{ matrix.description }}
+        if: needs.test.outputs[ ${{ matrix.name }}-retry ] == 'true'
         # uses: Sapper/action-test-fw-eod@eeacfa2d0aebe12220b8155ff03b7754805ee13e  # v1.42.0
         # if: needs.Diff-to-current-st-extended-version.outputs.test_required == 'true' || github.event_name == 'workflow_dispatch'
         # with:

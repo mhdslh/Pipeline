@@ -5,8 +5,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         node-version: [18, 20, 22] # This will create 3 parallel jobs
     steps:
